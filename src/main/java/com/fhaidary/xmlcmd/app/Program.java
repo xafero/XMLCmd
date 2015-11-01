@@ -1,7 +1,10 @@
 package com.fhaidary.xmlcmd.app;
 
-import javax.xml.xpath.*;
-import org.xml.sax.*;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
+import org.xml.sax.InputSource;
 
 public class Program {
 
