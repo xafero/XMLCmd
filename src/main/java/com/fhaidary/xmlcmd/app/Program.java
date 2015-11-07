@@ -20,6 +20,7 @@ public class Program {
 	private static final String S_XPATH = "p";
 	private static final String S_XSLT = "s";
 	private static final String S_2JSON = "j";
+	private static final String S_2XML = "x";
 
 	public static void main(String[] args) throws Exception {
 		// Define options
@@ -30,6 +31,7 @@ public class Program {
 		Option xslt = Option.builder(S_XSLT).desc("process stylesheet").argName("XSLT").longOpt("transform").hasArg()
 				.build();
 		Option toJson = Option.builder(S_2JSON).desc("convert to JSON").longOpt("convertToJson").build();
+		Option toXml = Option.builder(S_2XML).desc("convert to XML").longOpt("convertToXml").build();
 		// Collect them
 		Options options = new Options();
 		options.addOption(help);
@@ -37,6 +39,7 @@ public class Program {
 		options.addOption(xpath);
 		options.addOption(xslt);
 		options.addOption(toJson);
+		options.addOption(toXml);
 		// If nothing given, nothing will happen
 		if (args == null || args.length < 1) {
 			printHelp(options);
@@ -76,6 +79,11 @@ public class Program {
 		if (line.hasOption(S_2JSON)) {
 			String file = line.getOptionValue(S_INPUT);
 			JsonTool.convert2Json(file);
+			return;
+		}
+		if (line.hasOption(S_2XML)) {
+			String file = line.getOptionValue(S_INPUT);
+			JsonTool.convert2Xml(file);
 			return;
 		}
 	}

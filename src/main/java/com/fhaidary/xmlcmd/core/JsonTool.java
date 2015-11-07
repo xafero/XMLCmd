@@ -2,22 +2,109 @@ package com.fhaidary.xmlcmd.core;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+
+import javanet.staxutils.IndentingXMLStreamWriter;
 
 public final class JsonTool {
 
 	private static final JsonParser parser = new JsonParser();
+
+	public static void convert2Xml(String file) throws IOException, XMLStreamException {
+		// Set it up...
+		StringWriter out = new StringWriter();
+		XMLOutputFactory factory = XMLOutputFactory.newFactory();
+		XMLStreamWriter writer = factory.createXMLStreamWriter(out);
+		writer = new IndentingXMLStreamWriter(writer);
+		// Work...
+		InputStreamReader in = new InputStreamReader(new FileInputStream(file), "UTF8");
+		JsonReader json = new JsonReader(in);
+		convert2Xml(json, writer);
+		// Finish...
+		json.close();
+		writer.close();
+		// Output it!
+		System.out.println(out.toString().trim());
+	}
+
+	private static void convert2Xml(JsonReader json, XMLStreamWriter xml) throws IOException, XMLStreamException {
+		xml.writeStartDocument("UTF8", "1.0");
+		for (JsonToken event = json.peek();; event = json.peek()) {
+			switch (event) {
+			case BEGIN_OBJECT:
+				json.beginObject();
+				break;
+			case NAME:
+				String raw = json.nextName();
+				String[] parts = raw.split("_");
+				String fix = parts.length == 2 ? parts[0] : "";
+				String uri = "";
+				String name = parts.length == 2 ? parts[1] : parts[0];
+				name = name.replace("#sub", "json");
+				JsonToken next = json.peek();
+				if (next == JsonToken.BEGIN_OBJECT)
+					xml.writeStartElement(fix, name, uri);
+				else if (next == JsonToken.BEGIN_ARRAY)
+					xml.writeStartElement(fix, name, uri);
+				else {
+					String val = json.nextString();
+					try {
+						if (name.equals("#txt"))
+							xml.writeCharacters(val);
+						else
+							xml.writeAttribute(fix, uri, name, val);
+					} catch (XMLStreamException xse) {
+						xml.writeStartElement(fix, name, uri);
+						xml.writeCharacters(val);
+						xml.writeEndElement();
+					}
+				}
+				break;
+			case END_OBJECT:
+				json.endObject();
+				try {
+					xml.writeEndElement();
+				} catch (XMLStreamException xse) {
+				}
+				break;
+			case BEGIN_ARRAY:
+				json.beginArray();
+				while (json.hasNext()) {
+					String itemType = (json.peek() + "").toLowerCase();
+					String val = json.nextString();
+					xml.writeStartElement(itemType);
+					xml.writeCharacters(val);
+					xml.writeEndElement();
+				}
+				break;
+			case END_ARRAY:
+				json.endArray();
+				xml.writeEndElement();
+				break;
+			case END_DOCUMENT:
+				xml.writeEndDocument();
+				return;
+			default:
+				throw new UnsupportedOperationException(event + "!");
+			}
+		}
+	}
 
 	public static void convert2Json(String file) throws IOException, XMLStreamException {
 		// Set it up...

@@ -4,7 +4,7 @@
 
 	<groupId>com.fhaidary</groupId>
 	<artifactId>xmlcmd</artifactId>
-	<version>0.3</version>
+	<version>0.4</version>
 	<packaging>jar</packaging>
 
 	<name>XML cmd</name>
@@ -35,6 +35,17 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.stax-utils</groupId>
+			<artifactId>stax-utils</artifactId>
+			<version>20070216</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.bea.xml</groupId>
+					<artifactId>jsr173-ri</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
