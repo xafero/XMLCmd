@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -14,6 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.stream.XMLEventReader;
@@ -122,31 +127,53 @@ public class ExtractTool {
 		xpaths.addAll(currents);
 	}
 
-	public static void compareXPaths(String srcPath, File cmpFile) throws IOException, XPathExpressionException {
-		List<String> xpaths = FileUtils.readLines(cmpFile);
-		Map<String, Terms> memory = new TreeMap<String, Terms>();
-		AtomicInteger counter = new AtomicInteger(0);
+	public static void compareXPaths(String srcPath, File cmpFile)
+			throws IOException, XPathExpressionException, InterruptedException {
+		// Set up...
+		final List<String> xpaths = FileUtils.readLines(cmpFile);
+		final Map<String, Terms> memory = new ConcurrentHashMap<String, Terms>();
+		final AtomicInteger counter = new AtomicInteger(0);
 		File dir = new File(srcPath);
-		for (File file : dir.listFiles()) {
+		// Get in pool...
+		int cpuCount = Runtime.getRuntime().availableProcessors();
+		ExecutorService pool = Executors.newFixedThreadPool(cpuCount);
+		// Do the work...
+		for (final File file : dir.listFiles()) {
 			if (!file.getName().toLowerCase().endsWith(".xml"))
 				continue;
-			compareXPaths(file, xpaths, memory, counter);
-			counter.incrementAndGet();
+			pool.submit(new Runnable() {
+				public void run() {
+					try {
+						compareXPaths(file, xpaths, memory, counter);
+						counter.incrementAndGet();
+					} catch (Exception e) {
+						e.printStackTrace(System.err);
+					}
+				}
+			});
 		}
+		// Get out of pool...
+		pool.shutdown();
+		pool.awaitTermination(1, TimeUnit.DAYS);
+		// Finish and save!
 		Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
-		gson.toJson(memory, System.out);
+		Map<String, Terms> copy = new TreeMap<String, Terms>(memory);
+		gson.toJson(copy, System.out);
 	}
 
 	private static void compareXPaths(File file, List<String> xpaths, Map<String, Terms> memory, AtomicInteger countAll)
-			throws XPathExpressionException {
+			throws XPathExpressionException, IOException {
 		// Set up input
-		InputSource source = new InputSource(file.getAbsolutePath());
+		String content = FileUtils.readFileToString(file, "UTF8");
 		// Initialize XPath
-		XPath xpath = XPathTool.createXPath(source);
+		XPath xpath = XPathTool.createXPath(toSource(content));
 		// Go for all XPaths
 		for (String expr : xpaths) {
+			// Check if killed...
+			if (Thread.currentThread().isInterrupted())
+				return;
 			// Evaluate XPath expression
-			String result = XPathTool.evaluate(xpath, expr, source);
+			String result = XPathTool.evaluate(xpath, expr, toSource(content));
 			result = result.replaceAll("\\s+", " ").trim();
 			// If whitespace, ignore that!
 			if (result.isEmpty())
@@ -159,5 +186,9 @@ public class ExtractTool {
 				memory.put(expr, list = new Terms(countAll));
 			list.push(result);
 		}
+	}
+
+	private static InputSource toSource(String content) {
+		return new InputSource(new StringReader(content));
 	}
 }
