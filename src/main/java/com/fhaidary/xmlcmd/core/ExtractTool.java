@@ -59,6 +59,11 @@ public class ExtractTool {
 				StartElement start = evt.asStartElement();
 				int index = 1;
 				String local = start.getName().getLocalPart();
+				// Patch for name-spaces
+				String ns = start.getName().getNamespaceURI();
+				if (ns != null && !ns.isEmpty())
+					local = ':' + local;
+				// Proceed...
 				String parent = buildXPath(names);
 				String xpath;
 				while (true) {
