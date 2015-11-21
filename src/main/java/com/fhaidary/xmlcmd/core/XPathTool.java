@@ -11,9 +11,7 @@ import com.fhaidary.xmlcmd.util.EasyNamespaceContext;
 
 public final class XPathTool {
 
-	public static void evaluate(String file, String path) throws XPathExpressionException {
-		// Set up input
-		InputSource source = new InputSource(file);
+	static XPath createXPath(InputSource source) throws XPathExpressionException {
 		// Create new factory for XPath
 		XPathFactory factory = XPathFactory.newInstance();
 		XPath xpath = factory.newXPath();
@@ -21,9 +19,21 @@ public final class XPathTool {
 		EasyNamespaceContext ctx = new EasyNamespaceContext();
 		ctx.setDefaultNamespace(xpath.evaluate("namespace-uri(/*)", source));
 		xpath.setNamespaceContext(ctx);
-		// Evaluate XPath expression
+		return xpath;
+	}
+
+	static String evaluate(XPath xpath, String path, InputSource source) throws XPathExpressionException {
 		XPathExpression expr = xpath.compile(path);
-		String result = expr.evaluate(source);
+		return expr.evaluate(source);
+	}
+
+	public static void evaluate(String file, String path) throws XPathExpressionException {
+		// Set up input
+		InputSource source = new InputSource(file);
+		// Initialize XPath
+		XPath xpath = createXPath(source);
+		// Evaluate XPath expression
+		String result = evaluate(xpath, path, source);
 		// Output it!
 		System.out.println(result.trim());
 	}

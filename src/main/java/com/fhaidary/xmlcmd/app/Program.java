@@ -25,6 +25,7 @@ public class Program {
 	private static final String S_2JSON = "j";
 	private static final String S_2XML = "x";
 	private static final String S_XPEXTR = "e";
+	private static final String S_XPCMP = "c";
 
 	public static void main(String[] args) throws Exception {
 		// Define options
@@ -38,6 +39,8 @@ public class Program {
 		Option toXml = Option.builder(S_2XML).desc("convert to XML").longOpt("convertToXml").build();
 		Option exXPath = Option.builder(S_XPEXTR).desc("extract XPaths").argName("out").longOpt("extract").hasArg()
 				.build();
+		Option cmpXPath = Option.builder(S_XPCMP).desc("compare by XPaths").argName("list").longOpt("compare").hasArg()
+				.build();
 		// Collect them
 		Options options = new Options();
 		options.addOption(help);
@@ -47,6 +50,7 @@ public class Program {
 		options.addOption(toJson);
 		options.addOption(toXml);
 		options.addOption(exXPath);
+		options.addOption(cmpXPath);
 		// If nothing given, nothing will happen
 		if (args == null || args.length < 1) {
 			printHelp(options);
@@ -97,6 +101,12 @@ public class Program {
 			String file = line.getOptionValue(S_INPUT);
 			String out = line.getOptionValue(S_XPEXTR);
 			ExtractTool.extractXPaths(file, new File(out));
+			return;
+		}
+		if (line.hasOption(S_XPCMP)) {
+			String file = line.getOptionValue(S_INPUT);
+			String list = line.getOptionValue(S_XPCMP);
+			ExtractTool.compareXPaths(file, new File(list));
 			return;
 		}
 	}

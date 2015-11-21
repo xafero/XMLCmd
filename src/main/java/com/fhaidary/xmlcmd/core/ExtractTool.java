@@ -9,8 +9,12 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -18,8 +22,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.FileUtils;
+import org.xml.sax.InputSource;
+
+import com.fhaidary.xmlcmd.util.Terms;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class ExtractTool {
 
@@ -104,5 +115,44 @@ public class ExtractTool {
 		Collection<String> currents = extractXPaths(file);
 		System.out.println(" => " + currents.size() + " expressions extracted!");
 		xpaths.addAll(currents);
+	}
+
+	public static void compareXPaths(String srcPath, File cmpFile) throws IOException, XPathExpressionException {
+		List<String> xpaths = FileUtils.readLines(cmpFile);
+		Map<String, Terms> memory = new TreeMap<String, Terms>();
+		AtomicInteger counter = new AtomicInteger(0);
+		File dir = new File(srcPath);
+		for (File file : dir.listFiles()) {
+			if (!file.getName().toLowerCase().endsWith(".xml"))
+				continue;
+			compareXPaths(file, xpaths, memory, counter);
+			counter.incrementAndGet();
+		}
+		Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
+		gson.toJson(memory, System.out);
+	}
+
+	private static void compareXPaths(File file, List<String> xpaths, Map<String, Terms> memory, AtomicInteger countAll)
+			throws XPathExpressionException {
+		// Set up input
+		InputSource source = new InputSource(file.getAbsolutePath());
+		// Initialize XPath
+		XPath xpath = XPathTool.createXPath(source);
+		// Go for all XPaths
+		for (String expr : xpaths) {
+			// Evaluate XPath expression
+			String result = XPathTool.evaluate(xpath, expr, source);
+			result = result.replaceAll("\\s+", " ").trim();
+			// If whitespace, ignore that!
+			if (result.isEmpty())
+				continue;
+			// Store values...
+			Terms list;
+			if (memory.containsKey(expr))
+				list = memory.get(expr);
+			else
+				memory.put(expr, list = new Terms(countAll));
+			list.push(result);
+		}
 	}
 }
