@@ -1,5 +1,7 @@
 package com.fhaidary.xmlcmd.app;
 
+import java.io.File;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -7,6 +9,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import com.fhaidary.xmlcmd.core.ExtractTool;
 import com.fhaidary.xmlcmd.core.JsonTool;
 import com.fhaidary.xmlcmd.core.XPathTool;
 import com.fhaidary.xmlcmd.core.XsltTool;
@@ -21,6 +24,7 @@ public class Program {
 	private static final String S_XSLT = "s";
 	private static final String S_2JSON = "j";
 	private static final String S_2XML = "x";
+	private static final String S_XPEXTR = "e";
 
 	public static void main(String[] args) throws Exception {
 		// Define options
@@ -32,6 +36,8 @@ public class Program {
 				.build();
 		Option toJson = Option.builder(S_2JSON).desc("convert to JSON").longOpt("convertToJson").build();
 		Option toXml = Option.builder(S_2XML).desc("convert to XML").longOpt("convertToXml").build();
+		Option exXPath = Option.builder(S_XPEXTR).desc("extract XPaths").argName("out").longOpt("extract").hasArg()
+				.build();
 		// Collect them
 		Options options = new Options();
 		options.addOption(help);
@@ -40,6 +46,7 @@ public class Program {
 		options.addOption(xslt);
 		options.addOption(toJson);
 		options.addOption(toXml);
+		options.addOption(exXPath);
 		// If nothing given, nothing will happen
 		if (args == null || args.length < 1) {
 			printHelp(options);
@@ -84,6 +91,12 @@ public class Program {
 		if (line.hasOption(S_2XML)) {
 			String file = line.getOptionValue(S_INPUT);
 			JsonTool.convert2Xml(file);
+			return;
+		}
+		if (line.hasOption(S_XPEXTR)) {
+			String file = line.getOptionValue(S_INPUT);
+			String out = line.getOptionValue(S_XPEXTR);
+			ExtractTool.extractXPaths(file, new File(out));
 			return;
 		}
 	}

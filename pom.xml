@@ -4,7 +4,7 @@
 
 	<groupId>com.fhaidary</groupId>
 	<artifactId>xmlcmd</artifactId>
-	<version>0.4</version>
+	<version>0.5</version>
 	<packaging>jar</packaging>
 
 	<name>XML cmd</name>
@@ -46,6 +46,11 @@
 					<artifactId>jsr173-ri</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
 		</dependency>
 	</dependencies>
 
