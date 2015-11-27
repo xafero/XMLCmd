@@ -19,6 +19,7 @@ public class Program {
 	private static final String APP_SHORT_NAME = "xmlcmd";
 	private static final String APP_SRC_URL = "https://github.com/fhaidary/XMLCmd";
 
+	private static final String S_HELP = "?";
 	private static final String S_INPUT = "i";
 	private static final String S_XPATH = "p";
 	private static final String S_XSLT = "s";
@@ -29,7 +30,7 @@ public class Program {
 
 	public static void main(String[] args) throws Exception {
 		// Define options
-		Option help = new Option("?", "help", false, "print this message");
+		Option help = new Option(S_HELP, "help", false, "print this message");
 		Option file = Option.builder(S_INPUT).desc("specify input").argName("file").longOpt("input").hasArg().build();
 		Option xpath = Option.builder(S_XPATH).desc("process expression").argName("XPath").longOpt("evaluate").hasArg()
 				.build();
@@ -75,6 +76,10 @@ public class Program {
 	}
 
 	private static void process(CommandLine line, Options options) throws Exception {
+		if (line.hasOption(S_HELP)) {
+			printHelp(options);
+			return;
+		}
 		if (line.hasOption(S_XPATH)) {
 			String file = line.getOptionValue(S_INPUT);
 			String xpath = line.getOptionValue(S_XPATH);
