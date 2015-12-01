@@ -31,6 +31,8 @@ public class DsvTool {
 		CSVFormat fmt = CSVFormat.DEFAULT.withHeader();
 		if (ext.equalsIgnoreCase("TSV"))
 			fmt = CSVFormat.TDF.withHeader();
+		else if (ext.equalsIgnoreCase("SSV"))
+			fmt = fmt.withDelimiter(';');
 		CSVParser csv = CSVParser.parse(file, Charsets.UTF_8, fmt);
 		convert2Xml(root, csv, writer);
 		// Finish...

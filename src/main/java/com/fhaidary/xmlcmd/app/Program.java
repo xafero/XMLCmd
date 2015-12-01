@@ -102,7 +102,7 @@ public class Program {
 		if (line.hasOption(S_2XML)) {
 			String file = line.getOptionValue(S_INPUT);
 			String ext = FilenameUtils.getExtension(file);
-			if (ext.equalsIgnoreCase("CSV") || ext.equalsIgnoreCase("TSV"))
+			if (ext.equalsIgnoreCase("CSV") || ext.equalsIgnoreCase("TSV") || ext.equalsIgnoreCase("SSV"))
 				DsvTool.convert2Xml(file);
 			else
 				JsonTool.convert2Xml(file);
