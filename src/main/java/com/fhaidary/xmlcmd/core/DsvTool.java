@@ -50,8 +50,12 @@ public class DsvTool {
 		while (it.hasNext()) {
 			CSVRecord row = it.next();
 			xml.writeStartElement("entry");
-			for (String column : csv.getHeaderMap().keySet()) {
-				String value = row.get(column).trim();
+			for (String key : csv.getHeaderMap().keySet()) {
+				String column = key.trim();
+				if (column.isEmpty())
+					continue;
+				String value = row.get(key);
+				value = value.trim();
 				if (value.isEmpty())
 					continue;
 				xml.writeStartElement(column);
