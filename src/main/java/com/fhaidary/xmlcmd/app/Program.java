@@ -8,7 +8,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.io.FilenameUtils;
 
+import com.fhaidary.xmlcmd.core.DsvTool;
 import com.fhaidary.xmlcmd.core.ExtractTool;
 import com.fhaidary.xmlcmd.core.JsonTool;
 import com.fhaidary.xmlcmd.core.XPathTool;
@@ -99,7 +101,11 @@ public class Program {
 		}
 		if (line.hasOption(S_2XML)) {
 			String file = line.getOptionValue(S_INPUT);
-			JsonTool.convert2Xml(file);
+			String ext = FilenameUtils.getExtension(file);
+			if (ext.equalsIgnoreCase("CSV") || ext.equalsIgnoreCase("TSV"))
+				DsvTool.convert2Xml(file);
+			else
+				JsonTool.convert2Xml(file);
 			return;
 		}
 		if (line.hasOption(S_XPEXTR)) {
