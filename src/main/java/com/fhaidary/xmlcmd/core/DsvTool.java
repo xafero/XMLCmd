@@ -1,7 +1,8 @@
 package com.fhaidary.xmlcmd.core;
 
 import java.io.File;
-import java.io.StringWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
@@ -23,7 +24,7 @@ public class DsvTool {
 		String root = FilenameUtils.getBaseName(path);
 		String ext = FilenameUtils.getExtension(path);
 		// Set it up...
-		StringWriter out = new StringWriter();
+		Writer out = new PrintWriter(System.out);
 		XMLOutputFactory factory = XMLOutputFactory.newFactory();
 		XMLStreamWriter writer = factory.createXMLStreamWriter(out);
 		writer = new IndentingXMLStreamWriter(writer);
@@ -38,8 +39,6 @@ public class DsvTool {
 		// Finish...
 		csv.close();
 		writer.close();
-		// Output it!
-		System.out.println(out.toString().trim());
 	}
 
 	private static void convert2Xml(String root, CSVParser csv,
@@ -54,7 +53,7 @@ public class DsvTool {
 				String column = key.trim();
 				if (column.isEmpty())
 					continue;
-				String value = row.get(key);
+				String value = safeGet(row, key, xml);
 				value = value.trim();
 				if (value.isEmpty())
 					continue;
@@ -63,8 +62,19 @@ public class DsvTool {
 				xml.writeEndElement();
 			}
 			xml.writeEndElement();
+			xml.flush();
 		}
 		xml.writeEndElement();
 		xml.writeEndDocument();
+	}
+
+	private static String safeGet(CSVRecord row, String key, XMLStreamWriter xml)
+			throws XMLStreamException {
+		try {
+			return row.get(key);
+		} catch (Exception e) {
+			xml.writeComment(e.getMessage().trim());
+			return "";
+		}
 	}
 }
