@@ -21,6 +21,7 @@ public class DsvTool {
 	public static void convert2Xml(String path) throws Exception {
 		File file = new File(path);
 		String root = FilenameUtils.getBaseName(path);
+		String ext = FilenameUtils.getExtension(path);
 		// Set it up...
 		StringWriter out = new StringWriter();
 		XMLOutputFactory factory = XMLOutputFactory.newFactory();
@@ -28,6 +29,8 @@ public class DsvTool {
 		writer = new IndentingXMLStreamWriter(writer);
 		// Work...
 		CSVFormat fmt = CSVFormat.DEFAULT.withHeader();
+		if (ext.equalsIgnoreCase("TSV"))
+			fmt = CSVFormat.TDF.withHeader();
 		CSVParser csv = CSVParser.parse(file, Charsets.UTF_8, fmt);
 		convert2Xml(root, csv, writer);
 		// Finish...
