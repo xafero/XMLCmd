@@ -15,6 +15,7 @@ import com.fhaidary.xmlcmd.core.ExtractTool;
 import com.fhaidary.xmlcmd.core.JsonTool;
 import com.fhaidary.xmlcmd.core.XPathTool;
 import com.fhaidary.xmlcmd.core.XsltTool;
+import com.fhaidary.xmlcmd.core.YamlTool;
 
 public class Program {
 
@@ -104,6 +105,8 @@ public class Program {
 			String ext = FilenameUtils.getExtension(file);
 			if (ext.equalsIgnoreCase("CSV") || ext.equalsIgnoreCase("TSV") || ext.equalsIgnoreCase("SSV"))
 				DsvTool.convert2Xml(file);
+			else if (ext.equalsIgnoreCase("YML") || ext.equalsIgnoreCase("YAML"))
+				YamlTool.convert2Xml(file);
 			else
 				JsonTool.convert2Xml(file);
 			return;

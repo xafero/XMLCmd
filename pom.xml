@@ -4,7 +4,7 @@
 
 	<groupId>com.fhaidary</groupId>
 	<artifactId>xmlcmd</artifactId>
-	<version>0.6.3</version>
+	<version>0.7</version>
 	<packaging>jar</packaging>
 
 	<name>XML cmd</name>
@@ -57,6 +57,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.16</version>
 		</dependency>
 	</dependencies>
 

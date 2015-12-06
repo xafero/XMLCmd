@@ -1,0 +1,10 @@
+order: 
+    date: 11/29/2005
+    receipts:
+        -   store: ken stanton music
+            category: entertainment
+            description: saxophone repair
+            total: 382.00
+        -   store: walmart
+            category: groceries
+            total: 14.26
